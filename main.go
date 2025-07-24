@@ -12,8 +12,13 @@ func main() {
 	viper.AddConfigPath(".")
 
 	err := viper.ReadInConfig()
+
 	if err != nil {
-		fmt.Println("No config file found; using defaults or env vars.")
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			fmt.Println("No config file found; using defaults or env vars.")
+		} else {
+			panic(fmt.Errorf("fatal error config file: %w", err))
+		}
 	}
 
 	cmd.Execute()
