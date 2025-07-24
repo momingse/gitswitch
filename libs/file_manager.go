@@ -1,6 +1,7 @@
+// service.go
 package libs
 
-import "go.etcd.io/bbolt"
+import "fmt"
 
 type Service struct {
 	db           DB
@@ -12,16 +13,22 @@ func NewService(db DB, kvBucketName string) *Service {
 }
 
 func (s *Service) Add(key, value string) error {
-	return s.db.Update(func(tx *bbolt.Tx) error {
+	return s.db.Update(func(tx Tx) error {
 		b := tx.Bucket([]byte(s.kvBucketName))
+		if b == nil {
+			return fmt.Errorf("bucket %s not found", s.kvBucketName)
+		}
 		return b.Put([]byte(key), []byte(value))
 	})
 }
 
 func (s *Service) Get(key string) (string, error) {
 	var value []byte
-	err := s.db.View(func(tx *bbolt.Tx) error {
+	err := s.db.View(func(tx Tx) error {
 		b := tx.Bucket([]byte(s.kvBucketName))
+		if b == nil {
+			return fmt.Errorf("bucket %s not found", s.kvBucketName)
+		}
 		value = b.Get([]byte(key))
 		return nil
 	})
@@ -30,3 +37,4 @@ func (s *Service) Get(key string) (string, error) {
 	}
 	return string(value), nil
 }
+
