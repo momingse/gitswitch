@@ -1,0 +1,3 @@
+gen-mock:
+	go generate ./...
+
