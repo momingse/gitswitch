@@ -3,16 +3,17 @@ package libs
 import "go.etcd.io/bbolt"
 
 type Service struct {
-	db DB
+	db           DB
+	kvBucketName string
 }
 
-func NewService(db DB) *Service {
-	return &Service{db}
+func NewService(db DB, kvBucketName string) *Service {
+	return &Service{db, kvBucketName}
 }
 
 func (s *Service) Add(key, value string) error {
 	return s.db.Update(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte("kv"))
+		b := tx.Bucket([]byte(s.kvBucketName))
 		return b.Put([]byte(key), []byte(value))
 	})
 }
@@ -20,7 +21,7 @@ func (s *Service) Add(key, value string) error {
 func (s *Service) Get(key string) (string, error) {
 	var value []byte
 	err := s.db.View(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte("kv"))
+		b := tx.Bucket([]byte(s.kvBucketName))
 		value = b.Get([]byte(key))
 		return nil
 	})
@@ -29,4 +30,3 @@ func (s *Service) Get(key string) (string, error) {
 	}
 	return string(value), nil
 }
-
