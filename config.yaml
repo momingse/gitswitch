@@ -1,3 +1,3 @@
 app_name: "gs"
 author: "momingse"
-KVBucketName: "gs"
+kv_bucket_name: "gs"

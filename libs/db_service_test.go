@@ -84,7 +84,7 @@ func TestService_Add(t *testing.T) {
 
 			tt.setupMock(mockDB, mockTx, mockBucket)
 
-			service := libs.NewService(mockDB, "test-bucket")
+			service := libs.NewDBService(mockDB, "test-bucket")
 			err := service.Add(tt.key, tt.value)
 
 			if (err != nil) != tt.wantErr {
@@ -163,7 +163,7 @@ func TestService_Get(t *testing.T) {
 
 			tt.setupMock(mockDB, mockTx, mockBucket)
 
-			service := libs.NewService(mockDB, "test-bucket")
+			service := libs.NewDBService(mockDB, "test-bucket")
 			value, err := service.Get(tt.key)
 
 			if (err != nil) != tt.wantErr {

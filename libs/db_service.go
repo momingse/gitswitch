@@ -2,16 +2,16 @@ package libs
 
 import "fmt"
 
-type Service struct {
+type DBService struct {
 	db           DB
 	kvBucketName string
 }
 
-func NewService(db DB, kvBucketName string) *Service {
-	return &Service{db, kvBucketName}
+func NewDBService(db DB, kvBucketName string) *DBService {
+	return &DBService{db, kvBucketName}
 }
 
-func (s *Service) Add(key, value string) error {
+func (s *DBService) Add(key, value string) error {
 	return s.db.Update(func(tx Tx) error {
 		b := tx.Bucket([]byte(s.kvBucketName))
 		if b == nil {
@@ -21,7 +21,7 @@ func (s *Service) Add(key, value string) error {
 	})
 }
 
-func (s *Service) Get(key string) (string, error) {
+func (s *DBService) Get(key string) (string, error) {
 	var value []byte
 	err := s.db.View(func(tx Tx) error {
 		b := tx.Bucket([]byte(s.kvBucketName))
@@ -36,4 +36,3 @@ func (s *Service) Get(key string) (string, error) {
 	}
 	return string(value), nil
 }
-
