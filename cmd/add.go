@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -32,59 +31,50 @@ Usage Scenarios:
 In all cases, the path is saved and can be accessed later with 'gs <alias>'.`,
 		Args: cobra.RangeArgs(0, 2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			switch len(args) {
-			case 0:
-				currentDirectory, err := fileService.GetCurrentPath()
-				if err != nil {
-					fmt.Println(err)
-					return errors.New("failed to get current directory")
-				}
+			alias, path, err := determineAliasAndPath(args, fileService)
+			if err != nil {
+				return err
+			}
 
-				folderName := fileService.GetParentFolderName(currentDirectory)
-
-				err = dbService.Add(folderName, currentDirectory)
-				if err != nil {
-					fmt.Println(err)
-					return errors.New("failed to add to database")
-				}
-
-				fmt.Printf("Added %s to gitswitch\n", folderName)
-			case 1:
-				alias := args[0]
-				currentDirectory, err := fileService.GetCurrentPath()
-				if err != nil {
-					fmt.Println(err)
-					return errors.New("failed to get current directory")
-				}
-
-				err = dbService.Add(alias, currentDirectory)
-				if err != nil {
-					fmt.Println(err)
-					return errors.New("failed to add to database")
-				}
-
-				fmt.Printf("Added %s to gitswitch\n", alias)
-			case 2:
-				alias := args[0]
-				path := args[1]
-
-				isPathExist := fileService.CheckIfPathExists(path)
-				if !isPathExist {
-					return errors.New("path does not exist")
-				}
-
-				err := dbService.Add(alias, path)
-				if err != nil {
-					fmt.Println(err)
-					return errors.New("failed to add to database")
-				}
-
-				fmt.Printf("Adding %s with path %s to gitswitch\n", alias, path)
-			default:
-				return errors.New("unexpected number of arguments")
+			if err := dbService.Add(alias, path); err != nil {
+				return fmt.Errorf("failed to add to database: %w", err)
 			}
 
 			return nil
 		},
 	}
 }
+
+func determineAliasAndPath(args []string, fileService FileService) (string, string, error) {
+	switch len(args) {
+	case 0:
+		currentDir, err := fileService.GetCurrentPath()
+		if err != nil {
+			return "", "", fmt.Errorf("failed to get current directory: %w", err)
+		}
+		alias := fileService.GetParentFolderName(currentDir)
+		return alias, currentDir, nil
+
+	case 1:
+		alias := args[0]
+		currentDir, err := fileService.GetCurrentPath()
+		if err != nil {
+			return "", "", fmt.Errorf("failed to get current directory: %w", err)
+		}
+		return alias, currentDir, nil
+
+	case 2:
+		alias := args[0]
+		path := args[1]
+
+		if !fileService.CheckIfPathExists(path) {
+			return "", "", fmt.Errorf("path does not exist: %s", path)
+		}
+
+		return alias, path, nil
+
+	default:
+		return "", "", fmt.Errorf("unexpected number of arguments: %d", len(args))
+	}
+}
+
