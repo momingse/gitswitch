@@ -10,7 +10,7 @@
 package mocks
 
 import (
-	libs "fs/libs"
+	libs "gs/libs"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"

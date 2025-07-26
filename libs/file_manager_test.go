@@ -2,8 +2,8 @@ package libs_test
 
 import (
 	"errors"
-	"fs/libs"
-	"fs/mocks"
+	"gs/libs"
+	"gs/mocks"
 	"testing"
 
 	"go.uber.org/mock/gomock"

@@ -57,8 +57,6 @@ func NewBoltDB(kvBucketName string) (*BoltDB, error) {
 		return nil, err
 	}
 
-	defer db.Close()
-
 	err = db.Update(func(tx *bbolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(kvBucketName))
 		return err
