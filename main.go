@@ -30,12 +30,13 @@ func main() {
 		}
 	}
 
-	db, err := libs.NewBoltDB(viper.GetString("kv_bucket_name"))
+	bucketName := viper.GetString("kv_bucket_name")
+	db, err := libs.NewBoltDB(bucketName)
 	if err != nil {
 		errorHandler(err, "NewBoltDB error")
 	}
 
-	dbService := libs.NewDBService(db, viper.GetString("kv_bucket_name"))
+	dbService := libs.NewDBService(db, bucketName)
 
 	rootCmd := cmd.NewRootCommand(dbService)
 	if err := rootCmd.Execute(); err != nil {
