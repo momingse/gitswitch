@@ -29,7 +29,7 @@ type BoltDB struct {
 	db *bbolt.DB
 }
 
-func getDBPaht() (string, error) {
+func getDBPath() (string, error) {
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -46,26 +46,26 @@ func getDBPaht() (string, error) {
 	return dbPath, nil
 }
 
-func NewBoltDB() *BoltDB {
-	path, err := getDBPaht()
+func NewBoltDB(kvBucketName string) (*BoltDB, error) {
+	path, err := getDBPath()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	db, err := bbolt.Open(path, 0666, nil)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	err = db.Update(func(tx *bbolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte("kv"))
+		_, err := tx.CreateBucketIfNotExists([]byte(kvBucketName))
 		return err
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return &BoltDB{db: db}
+	return &BoltDB{db: db}, nil
 }
 
 func (b *BoltDB) Update(fn func(Tx) error) error {

@@ -1,4 +1,3 @@
-// service.go
 package libs
 
 import "fmt"
