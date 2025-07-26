@@ -23,3 +23,8 @@ func (f *FileService) GetCurrentPath() (string, error) {
 func (f *FileService) GetParentFolderName(path string) string {
 	return filepath.Base(filepath.Dir(path))
 }
+
+func (f *FileService) CheckIfPathExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
