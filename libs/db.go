@@ -4,7 +4,7 @@ package libs
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/spf13/viper"
 	"go.etcd.io/bbolt"
@@ -36,9 +36,9 @@ func getDBPath() (string, error) {
 	}
 
 	folderName := fmt.Sprintf(".%s", viper.GetString("app_name"))
-	dbPath := path.Join(dirname, folderName, "bbolt.db")
-	if _, err := os.Stat(path.Dir(dbPath)); os.IsNotExist(err) {
-		if err := os.MkdirAll(path.Dir(dbPath), 0755); err != nil {
+	dbPath := filepath.Join(dirname, folderName, "bbolt.db")
+	if _, err := os.Stat(filepath.Dir(dbPath)); os.IsNotExist(err) {
+		if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
 			return "", err
 		}
 	}
@@ -56,6 +56,8 @@ func NewBoltDB(kvBucketName string) (*BoltDB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer db.Close()
 
 	err = db.Update(func(tx *bbolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(kvBucketName))
@@ -97,13 +99,13 @@ func (t *BoltTx) Bucket(name []byte) Bucket {
 }
 
 type BoltBucket struct {
-	db *bbolt.Bucket
+	bucket *bbolt.Bucket
 }
 
 func (b *BoltBucket) Put(key, value []byte) error {
-	return b.db.Put(key, value)
+	return b.bucket.Put(key, value)
 }
 
 func (b *BoltBucket) Get(key []byte) []byte {
-	return b.db.Get(key)
+	return b.bucket.Get(key)
 }

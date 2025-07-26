@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"fs/cmd"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -17,7 +18,8 @@ func main() {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			fmt.Println("No config file found; using defaults or env vars.")
 		} else {
-			panic(fmt.Errorf("fatal error config file: %w", err))
+			fmt.Fprintf(os.Stderr, "fatal error config file: %v\n", err)
+			os.Exit(1)
 		}
 	}
 
