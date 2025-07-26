@@ -15,7 +15,7 @@ func (s *DBService) Add(key, value string) error {
 	return s.db.Update(func(tx Tx) error {
 		b := tx.Bucket([]byte(s.kvBucketName))
 		if b == nil {
-			return fmt.Errorf("Bucket %s not found", s.kvBucketName)
+			return fmt.Errorf("bucket %s not found", s.kvBucketName)
 		}
 		return b.Put([]byte(key), []byte(value))
 	})
@@ -26,7 +26,7 @@ func (s *DBService) Get(key string) (string, error) {
 	err := s.db.View(func(tx Tx) error {
 		b := tx.Bucket([]byte(s.kvBucketName))
 		if b == nil {
-			return fmt.Errorf("Bucket %s not found", s.kvBucketName)
+			return fmt.Errorf("bucket %s not found", s.kvBucketName)
 		}
 		value = b.Get([]byte(key))
 		return nil

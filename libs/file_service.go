@@ -20,6 +20,6 @@ func (f *FileService) GetCurrentPath() (string, error) {
 	return filepath.Dir(ex), nil
 }
 
-func (f *FileService) GetParentFolderName(path string) (string, error) {
-	return filepath.Base(filepath.Dir(path)), nil
+func (f *FileService) GetParentFolderName(path string) string {
+	return filepath.Base(filepath.Dir(path))
 }
