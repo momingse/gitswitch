@@ -40,7 +40,7 @@ jobs:
 
     - name: Install nilaway
       run: |
-        go install github.com/google/nilaway/cmd/nilaway@latest
+        go install go.uber.org/nilaway/cmd/nilaway@latest
 
     - name: Run nilaway
       run: nilaway ./...
