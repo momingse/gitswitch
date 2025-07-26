@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"fs/cmd"
+	"gs/cmd"
 	"os"
 
 	"github.com/spf13/viper"

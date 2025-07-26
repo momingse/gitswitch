@@ -1,4 +1,4 @@
-module fs
+module gs
 
 go 1.24.5
 
