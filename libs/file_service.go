@@ -26,5 +26,5 @@ func (f *FileService) GetParentFolderName(path string) string {
 
 func (f *FileService) CheckIfPathExists(path string) bool {
 	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
+	return err == nil
 }
