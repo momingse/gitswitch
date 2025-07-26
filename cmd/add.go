@@ -15,7 +15,7 @@ type DBService interface {
 type FileService interface {
 	GetCurrentPath() (string, error)
 	GetParentFolderName(path string) string
-	CheckIfPathExists(path string) bool
+	CheckIfPathExists(path string) (bool, error)
 }
 
 func NewAddCmd(dbService DBService, fileService FileService) *cobra.Command {
@@ -47,33 +47,43 @@ In all cases, the path is saved and can be accessed later with 'gs <alias>'.`,
 }
 
 func determineAliasAndPath(args []string, fileService FileService) (string, string, error) {
+	currentPath, err := getPath(args, fileService)
+	if err != nil {
+		return "", "", err
+	}
+
+	alias, err := getAlias(args, fileService, currentPath)
+	if err != nil {
+		return "", "", err
+	}
+
+	return alias, currentPath, nil
+}
+
+func getPath(args []string, fileService FileService) (string, error) {
+	switch len(args) {
+	case 0, 1:
+		currentPath, err := fileService.GetCurrentPath()
+		if err != nil {
+			return "", errors.New("failed to get current path")
+		}
+		return currentPath, nil
+	case 2:
+		isPathExists, err := fileService.CheckIfPathExists(args[1])
+		if err != nil || !isPathExists {
+			return "", errors.New("path does not exist")
+		}
+		return args[1], nil
+	}
+	return "", errors.New("invalid number of arguments")
+}
+
+func getAlias(args []string, fileService FileService, currentPath string) (string, error) {
 	switch len(args) {
 	case 0:
-		currentDir, err := fileService.GetCurrentPath()
-		if err != nil {
-			return "", "", errors.New("failed to get current directory")
-		}
-		alias := fileService.GetParentFolderName(currentDir)
-		return alias, currentDir, nil
-
-	case 1:
-		alias := args[0]
-		currentDir, err := fileService.GetCurrentPath()
-		if err != nil {
-			return "", "", errors.New("failed to get current directory")
-		}
-		return alias, currentDir, nil
-
-	case 2:
-		alias := args[0]
-		path := args[1]
-
-		if !fileService.CheckIfPathExists(path) {
-			return "", "", errors.New("path does not exist")
-		}
-
-		return alias, path, nil
-
+		return fileService.GetParentFolderName(currentPath), nil
+	case 1, 2:
+		return args[0], nil
 	}
-	return "", "", errors.New("invalid number of arguments")
+	return "", errors.New("invalid number of arguments")
 }

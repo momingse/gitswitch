@@ -50,13 +50,13 @@ func TestAddCmd(t *testing.T) {
 			},
 		},
 		{
-			name: "failed no args due to fail to get current directory",
+			name: "failed no args due to fail to get current path",
 			args: []string{},
 			mockGetCurrentPath: MockCall[string]{
 				Times: 1,
 				Error: assert.AnError,
 			},
-			expectedError: "failed to get current directory",
+			expectedError: "failed to get current path",
 		},
 		{
 			name: "failed no args due to fail to add to database",
@@ -90,13 +90,13 @@ func TestAddCmd(t *testing.T) {
 			},
 		},
 		{
-			name: "failed with alias arg due to fail to get current directory",
+			name: "failed with alias arg due to fail to get current path",
 			args: []string{aliasValue},
 			mockGetCurrentPath: MockCall[string]{
 				Times: 1,
 				Error: assert.AnError,
 			},
-			expectedError: "failed to get current directory",
+			expectedError: "failed to get current path",
 		},
 		{
 			name: "failed with alias arg due to fail to add to database",
@@ -171,7 +171,7 @@ func TestAddCmd(t *testing.T) {
 			}
 
 			if tt.mockCheckIfPathExists.Times > 0 && len(tt.mockCheckIfPathExists.args) > 0 {
-				mockFileService.EXPECT().CheckIfPathExists(tt.mockCheckIfPathExists.args[0]).Return(tt.mockCheckIfPathExists.Response).Times(tt.mockCheckIfPathExists.Times)
+				mockFileService.EXPECT().CheckIfPathExists(tt.mockCheckIfPathExists.args[0]).Return(tt.mockCheckIfPathExists.Response, tt.mockCheckIfPathExists.Error).Times(tt.mockCheckIfPathExists.Times)
 			}
 
 			if tt.mockAdd.Times > 0 && len(tt.mockAdd.args) >= 2 {

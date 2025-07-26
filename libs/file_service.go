@@ -1,6 +1,8 @@
 package libs
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -24,7 +26,13 @@ func (f *FileService) GetParentFolderName(path string) string {
 	return filepath.Base(filepath.Dir(path))
 }
 
-func (f *FileService) CheckIfPathExists(path string) bool {
+func (f *FileService) CheckIfPathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
-	return err == nil
+	if err == nil {
+		return true, nil
+	}
+	if errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
 }

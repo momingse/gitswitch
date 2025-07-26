@@ -78,11 +78,12 @@ func (m *MockFileService) EXPECT() *MockFileServiceMockRecorder {
 }
 
 // CheckIfPathExists mocks base method.
-func (m *MockFileService) CheckIfPathExists(path string) bool {
+func (m *MockFileService) CheckIfPathExists(path string) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckIfPathExists", path)
 	ret0, _ := ret[0].(bool)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CheckIfPathExists indicates an expected call of CheckIfPathExists.
