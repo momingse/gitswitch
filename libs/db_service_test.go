@@ -3,13 +3,13 @@ package libs_test
 import (
 	"errors"
 	"gs/libs"
-	"gs/mocks"
+	mocks "gs/mocks/libs"
 	"testing"
 
 	"go.uber.org/mock/gomock"
 )
 
-func TestService_Add(t *testing.T) {
+func TestDBService_Add(t *testing.T) {
 	tests := []struct {
 		name      string
 		key       string
@@ -94,7 +94,7 @@ func TestService_Add(t *testing.T) {
 	}
 }
 
-func TestService_Get(t *testing.T) {
+func TestDBService_Get(t *testing.T) {
 	tests := []struct {
 		name      string
 		key       string

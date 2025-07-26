@@ -37,8 +37,9 @@ func main() {
 	}
 
 	dbService := libs.NewDBService(db, bucketName)
+	fileService := libs.NewFileService()
 
-	rootCmd := cmd.NewRootCommand(dbService)
+	rootCmd := cmd.NewRootCommand(dbService, fileService)
 	if err := rootCmd.Execute(); err != nil {
 		errorHandler(err, "Execute error")
 	}

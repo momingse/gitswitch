@@ -1,4 +1,4 @@
-//go:generate mockgen -destination=../mocks/db.go -package=mocks -source=db.go
+//go:generate mockgen -destination=../mocks/libs/db.go -package=mocks -source=db.go
 package libs
 
 import (
