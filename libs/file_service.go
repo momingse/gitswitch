@@ -12,7 +12,7 @@ func NewFileService() *FileService {
 	return &FileService{}
 }
 
-func (f *FileService) getCurrentPath() (string, error) {
+func (f *FileService) GetCurrentPath() (string, error) {
 	ex, err := os.Executable()
 	if err != nil {
 		return "", err
@@ -20,6 +20,6 @@ func (f *FileService) getCurrentPath() (string, error) {
 	return filepath.Dir(ex), nil
 }
 
-func (f *FileService) getParentFolderName(path string) (string, error) {
+func (f *FileService) GetParentFolderName(path string) (string, error) {
 	return filepath.Base(filepath.Dir(path)), nil
 }
