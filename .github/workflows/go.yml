@@ -43,7 +43,7 @@ jobs:
         go install go.uber.org/nilaway/cmd/nilaway@latest
 
     - name: Run nilaway
-      run: nilaway ./...
+      run: nilaway -exclude-pkgs=gs/mocks ./...
 
   test:
     name: Run Tests
