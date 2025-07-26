@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewAddCmd(dbService *libs.DBService) *cobra.Command {
+func NewAddCmd(dbService *libs.DBService, fileService *libs.FileService) *cobra.Command {
 	return &cobra.Command{
 		Use:   "add [alias] [path]",
 		Short: "Add a new project alias to gitswitch",
