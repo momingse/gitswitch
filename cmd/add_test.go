@@ -10,6 +10,7 @@ import (
 )
 
 type MockCall[T any] struct {
+	args     []string
 	Times    int
 	Response T
 	Error    error
@@ -18,6 +19,9 @@ type MockCall[T any] struct {
 func TestAddCmd(t *testing.T) {
 	currentPath := "currentPath"
 	parentFolderName := "parentFolderName"
+	pathValue := "pathValue"
+	aliasValue := "aliasValue"
+
 	tests := []struct {
 		name                    string
 		args                    []string
@@ -35,10 +39,12 @@ func TestAddCmd(t *testing.T) {
 				Response: currentPath,
 			},
 			mockGetParentFolderName: MockCall[string]{
+				args:     []string{currentPath},
 				Times:    1,
 				Response: parentFolderName,
 			},
 			mockAdd: MockCall[error]{
+				args:  []string{parentFolderName, currentPath},
 				Times: 1,
 			},
 		},
@@ -46,9 +52,8 @@ func TestAddCmd(t *testing.T) {
 			name: "failed no args due to fail to get current directory",
 			args: []string{},
 			mockGetCurrentPath: MockCall[string]{
-				Times:    1,
-				Response: "",
-				Error:    assert.AnError,
+				Times: 1,
+				Error: assert.AnError,
 			},
 			expectedError: "failed to get current directory",
 		},
@@ -60,10 +65,12 @@ func TestAddCmd(t *testing.T) {
 				Response: currentPath,
 			},
 			mockGetParentFolderName: MockCall[string]{
+				args:     []string{currentPath},
 				Times:    1,
 				Response: parentFolderName,
 			},
 			mockAdd: MockCall[error]{
+				args:  []string{parentFolderName, currentPath},
 				Times: 1,
 				Error: assert.AnError,
 			},
@@ -71,19 +78,19 @@ func TestAddCmd(t *testing.T) {
 		},
 		{
 			name: "successful with alias arg",
-			args: []string{"alias"},
+			args: []string{aliasValue},
 			mockGetCurrentPath: MockCall[string]{
 				Times:    1,
 				Response: currentPath,
 			},
-
 			mockAdd: MockCall[error]{
+				args:  []string{aliasValue, currentPath},
 				Times: 1,
 			},
 		},
 		{
 			name: "failed with alias arg due to fail to get current directory",
-			args: []string{"alias"},
+			args: []string{aliasValue},
 			mockGetCurrentPath: MockCall[string]{
 				Times: 1,
 				Error: assert.AnError,
@@ -92,13 +99,13 @@ func TestAddCmd(t *testing.T) {
 		},
 		{
 			name: "failed with alias arg due to fail to add to database",
-			args: []string{"alias"},
+			args: []string{aliasValue},
 			mockGetCurrentPath: MockCall[string]{
 				Times:    1,
 				Response: currentPath,
 			},
-
 			mockAdd: MockCall[error]{
+				args:  []string{aliasValue, currentPath},
 				Times: 1,
 				Error: assert.AnError,
 			},
@@ -106,19 +113,22 @@ func TestAddCmd(t *testing.T) {
 		},
 		{
 			name: "successful with alias and path arg",
-			args: []string{"alias", "path"},
+			args: []string{aliasValue, pathValue},
 			mockCheckIfPathExists: MockCall[bool]{
+				args:     []string{pathValue},
 				Times:    1,
 				Response: true,
 			},
 			mockAdd: MockCall[error]{
+				args:  []string{aliasValue, pathValue},
 				Times: 1,
 			},
 		},
 		{
 			name: "failed with alias and path arg due to fail to check if path exists",
-			args: []string{"alias", "path"},
+			args: []string{aliasValue, pathValue},
 			mockCheckIfPathExists: MockCall[bool]{
+				args:     []string{pathValue},
 				Times:    1,
 				Response: false,
 			},
@@ -126,12 +136,14 @@ func TestAddCmd(t *testing.T) {
 		},
 		{
 			name: "failed with alias and path arg due to fail to add to database",
-			args: []string{"alias", "path"},
+			args: []string{aliasValue, pathValue},
 			mockCheckIfPathExists: MockCall[bool]{
+				args:     []string{pathValue},
 				Times:    1,
 				Response: true,
 			},
 			mockAdd: MockCall[error]{
+				args:  []string{aliasValue, pathValue},
 				Times: 1,
 				Error: assert.AnError,
 			},
@@ -148,24 +160,22 @@ func TestAddCmd(t *testing.T) {
 			mockFileService := mocks.NewMockFileService(ctrl)
 			cmd := cmd.NewAddCmd(mockDBService, mockFileService)
 
-			var alias string
-			if len(tt.args) > 0 {
-				alias = tt.args[0]
-			} else {
-				alias = tt.mockGetParentFolderName.Response
+			// Set up mock expectations only when they should be called
+			if tt.mockGetCurrentPath.Times > 0 {
+				mockFileService.EXPECT().GetCurrentPath().Return(tt.mockGetCurrentPath.Response, tt.mockGetCurrentPath.Error).Times(tt.mockGetCurrentPath.Times)
 			}
 
-			var path string
-			if len(tt.args) > 1 {
-				path = tt.args[1]
-			} else {
-				path = tt.mockGetCurrentPath.Response
+			if tt.mockGetParentFolderName.Times > 0 && len(tt.mockGetParentFolderName.args) > 0 {
+				mockFileService.EXPECT().GetParentFolderName(tt.mockGetParentFolderName.args[0]).Return(tt.mockGetParentFolderName.Response).Times(tt.mockGetParentFolderName.Times)
 			}
 
-			mockFileService.EXPECT().GetCurrentPath().Return(tt.mockGetCurrentPath.Response, tt.mockGetCurrentPath.Error).Times(tt.mockGetCurrentPath.Times)
-			mockFileService.EXPECT().GetParentFolderName(gomock.Any()).Return(tt.mockGetParentFolderName.Response).Times(tt.mockGetParentFolderName.Times)
-			mockFileService.EXPECT().CheckIfPathExists(path).Return(tt.mockCheckIfPathExists.Response).Times(tt.mockCheckIfPathExists.Times)
-			mockDBService.EXPECT().Add(alias, path).Return(tt.mockAdd.Error).Times(tt.mockAdd.Times)
+			if tt.mockCheckIfPathExists.Times > 0 && len(tt.mockCheckIfPathExists.args) > 0 {
+				mockFileService.EXPECT().CheckIfPathExists(tt.mockCheckIfPathExists.args[0]).Return(tt.mockCheckIfPathExists.Response).Times(tt.mockCheckIfPathExists.Times)
+			}
+
+			if tt.mockAdd.Times > 0 && len(tt.mockAdd.args) >= 2 {
+				mockDBService.EXPECT().Add(tt.mockAdd.args[0], tt.mockAdd.args[1]).Return(tt.mockAdd.Error).Times(tt.mockAdd.Times)
+			}
 
 			cmd.SetArgs(tt.args)
 			err := cmd.Execute()
@@ -178,3 +188,4 @@ func TestAddCmd(t *testing.T) {
 		})
 	}
 }
+
