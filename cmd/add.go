@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -37,7 +38,7 @@ In all cases, the path is saved and can be accessed later with 'gs <alias>'.`,
 			}
 
 			if err := dbService.Add(alias, path); err != nil {
-				return fmt.Errorf("failed to add to database: %w", err)
+				return fmt.Errorf("failed to add %s with alias %s", path, alias)
 			}
 
 			return nil
@@ -50,7 +51,7 @@ func determineAliasAndPath(args []string, fileService FileService) (string, stri
 	case 0:
 		currentDir, err := fileService.GetCurrentPath()
 		if err != nil {
-			return "", "", fmt.Errorf("failed to get current directory: %w", err)
+			return "", "", errors.New("failed to get current directory")
 		}
 		alias := fileService.GetParentFolderName(currentDir)
 		return alias, currentDir, nil
@@ -59,7 +60,7 @@ func determineAliasAndPath(args []string, fileService FileService) (string, stri
 		alias := args[0]
 		currentDir, err := fileService.GetCurrentPath()
 		if err != nil {
-			return "", "", fmt.Errorf("failed to get current directory: %w", err)
+			return "", "", errors.New("failed to get current directory")
 		}
 		return alias, currentDir, nil
 
@@ -68,13 +69,11 @@ func determineAliasAndPath(args []string, fileService FileService) (string, stri
 		path := args[1]
 
 		if !fileService.CheckIfPathExists(path) {
-			return "", "", fmt.Errorf("path does not exist: %s", path)
+			return "", "", errors.New("path does not exist")
 		}
 
 		return alias, path, nil
 
-	default:
-		return "", "", fmt.Errorf("unexpected number of arguments: %d", len(args))
 	}
+	return "", "", errors.New("invalid number of arguments")
 }
-

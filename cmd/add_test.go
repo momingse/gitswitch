@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"fmt"
 	"gs/cmd"
 	mocks "gs/mocks/cmd"
 	"testing"
@@ -74,7 +75,7 @@ func TestAddCmd(t *testing.T) {
 				Times: 1,
 				Error: assert.AnError,
 			},
-			expectedError: "failed to add to database",
+			expectedError: fmt.Sprintf("failed to add %s with alias %s", currentPath, parentFolderName),
 		},
 		{
 			name: "successful with alias arg",
@@ -109,7 +110,7 @@ func TestAddCmd(t *testing.T) {
 				Times: 1,
 				Error: assert.AnError,
 			},
-			expectedError: "failed to add to database",
+			expectedError: fmt.Sprintf("failed to add %s with alias %s", currentPath, aliasValue),
 		},
 		{
 			name: "successful with alias and path arg",
@@ -147,7 +148,7 @@ func TestAddCmd(t *testing.T) {
 				Times: 1,
 				Error: assert.AnError,
 			},
-			expectedError: "failed to add to database",
+			expectedError: fmt.Sprintf("failed to add %s with alias %s", pathValue, aliasValue),
 		},
 	}
 
